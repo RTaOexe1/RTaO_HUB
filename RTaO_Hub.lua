@@ -1,5 +1,5 @@
 --//load and save
-local foldername = "Alchemy Hub - Kaitun"
+local foldername = "RTaO Hub - Kaitun"
 local filename = foldername.."/Setting.json"
 function saveSettings()
 	local HttpService = game:GetService("HttpService")
