@@ -1,5 +1,5 @@
 -- 📦 CONFIG
-_G.WebhookURL = "https://discord.com/api/webhooks/1264293481216610461/gnjmV3KrnLLmnVfz0qwh0JMUdOP44bhki2aaja_XjkA-UsyalWUxLgHjySZdNZbbVcUK" -- ใส่ webhook ของคุณ
+_G.WebhookURL = "https://discord.com/api/webhooks/1264293481216610461/gnjmV3KrnLLmnVfz0qwh0JMUdOP44bhki2aaja_XjkA-UsyalWUxLgHjySZdNZbbVcUK"
 _G.Enabled = true
 _G.Layout = {
     ["ROOT/SeedStock/Stocks"] = { title = "🌱 SEEDS STOCK", color = 65280 },
@@ -27,7 +27,8 @@ local function GetStockString(stock)
     local s = ""
     for name, data in pairs(stock) do
         local display = data.EggName or name
-        s ..= (`{display} x{data.Stock}\n`)
+        s ..= (`{display} x{data.Stock}
+`)
     end
     return s
 end
@@ -35,7 +36,6 @@ end
 -- 📤 ส่ง webhook แยก embed ต่อหมวด
 local function SendSingleEmbed(title, bodyText, color)
     if not _G.Enabled or not requestFunc then return end
-    if bodyText == "" then return end
 
     local body = {
         embeds = {{
@@ -69,17 +69,18 @@ end
 -- 📥 รับ event และส่งรายงาน
 DataStream.OnClientEvent:Connect(function(eventType, profile, data)
     if eventType ~= "UpdateData" then return end
-    if not profile:find(LocalPlayer.Name) then return end
+    if not profile:lower():match(LocalPlayer.Name:lower()) then return end
 
     for path, layout in pairs(_G.Layout) do
         local stockData = GetPacket(data, path)
         if stockData then
             local stockStr = GetStockString(stockData)
-            if stockStr ~= "" then
-                SendSingleEmbed(layout.title, stockStr, layout.color)
+            if stockStr == "" then
+                stockStr = "_ไม่มีสินค้าในสต็อก_"
             end
+            SendSingleEmbed(layout.title, stockStr, layout.color)
         end
     end
 end)
 
-print("[✅] Stock Checker พร้อมทำงาน (แบบแยก Embed)")
+print("[✅] Stock Checker พร้อมทำงาน (ส่งทุกครั้งแม้ stock ว่าง)")
