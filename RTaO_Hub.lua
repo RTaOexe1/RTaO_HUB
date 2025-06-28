@@ -1,5 +1,5 @@
 -- 📦 CONFIG
-_G.WebhookURL = "https://discord.com/api/webhooks/1264293481216610461/gnjmV3KrnLLmnVfz0qwh0JMUdOP44bhki2aaja_XjkA-UsyalWUxLgHjySZdNZbbVcUK" -- ใส่ webhook ของคุณ
+_G.WebhookURL = "{{WEBHOOK}}" -- ใส่ webhook ผ่าน Loader
 _G.Enabled = true
 _G.Layout = {
     ["ROOT/SeedStock/Stocks"] = { title = "🌱 SEEDS STOCK", color = 65280 },
@@ -17,9 +17,10 @@ local LocalPlayer = Players.LocalPlayer
 local DataStream = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("DataStream")
 
 -- 🌐 HTTP fallback
-local requestFunc = http_request or request or syn and syn.request
+local requestFunc = http_request or request or (syn and syn.request)
 if not requestFunc then
     warn("[❌] HTTP request ไม่รองรับบน executor นี้")
+    return
 end
 
 -- 🔄 แปลง stock เป็น string
@@ -27,7 +28,7 @@ local function GetStockString(stock)
     local s = ""
     for name, data in pairs(stock) do
         local display = data.EggName or name
-        s ..= (`{display} x{data.Stock}\n`)
+        s ..= (display .. " x" .. data.Stock .. "\n")
     end
     return s
 end
