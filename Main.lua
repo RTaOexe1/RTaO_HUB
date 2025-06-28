@@ -1,86 +1,90 @@
--- 📦 CONFIG
-_G.WebhookURL = "{{WEBHOOK}}" -- ใส่ webhook ผ่าน Loader
-_G.Enabled = true
-_G.Layout = {
-    ["ROOT/SeedStock/Stocks"] = { title = "🌱 SEEDS STOCK", color = 65280 },
-    ["ROOT/GearStock/Stocks"] = { title = "🛠️ GEAR STOCK", color = 16753920 },
-    ["ROOT/PetEggStock/Stocks"] = { title = "🥚 EGG STOCK", color = 16776960 },
-    ["ROOT/CosmeticStock/ItemStocks"] = { title = "🎨 COSMETIC STOCK", color = 16737792 },
-    ["ROOT/EventShopStock/Stocks"] = { title = "🎁 EVENT STOCK", color = 10027263 }
-}
+local HttpService=game:GetService("HttpService")
+local Players=game:GetService("Players")
+local ReplicatedStorage=game:GetService("ReplicatedStorage")
 
--- 📡 SERVICES
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
-local DataStream = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("DataStream")
-
--- 🌐 HTTP fallback
-local requestFunc = http_request or request or (syn and syn.request)
-if not requestFunc then
-    warn("[❌] HTTP request ไม่รองรับบน executor นี้")
-    return
+local function b64decode(data)
+    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    data=data:gsub('[^'..b..'=]', '')
+    return (data:gsub('.',function(x)
+        if x=='=' then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+        return r
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)
+        if #x~=8 then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
 end
 
--- 🔄 แปลง stock เป็น string
-local function GetStockString(stock)
-    local s = ""
-    for name, data in pairs(stock) do
-        local display = data.EggName or name
-        s ..= (display .. " x" .. data.Stock .. "\n")
+_G = _G or {}
+
+-- ตรงนี้แทนที่ {{WEBHOOK}} ด้วย base64 encoded webhook จริง โดย Loader.lua จะทำการแทนที่นี้ก่อนรัน
+_G.WebhookURL = b64decode("{{WEBHOOK}}")
+
+_G.Enabled=true
+
+local Players=Players
+local ReplicatedStorage=ReplicatedStorage
+local HttpService=HttpService
+local LocalPlayer=Players.LocalPlayer
+local DataStream=ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("DataStream")
+
+local function a(c)
+    local d=""
+    for e,f in pairs(c) do
+        local g=f.EggName or e
+        d=d..g.." x"..f.Stock.."\n"
     end
-    return s
+    return d
 end
 
--- 📤 ส่ง webhook แยก embed ต่อหมวด
-local function SendSingleEmbed(title, bodyText, color)
-    if not _G.Enabled or not requestFunc then return end
-    if bodyText == "" then return end
+local function c(h,i,j)
+    if not _G.Enabled then return end
+    if i=="" then return end
+    local requestFunc = syn and syn.request or http_request or request
+    if not requestFunc then return end
 
-    local body = {
-        embeds = {{
-            title = title,
-            description = bodyText,
-            color = color,
-            timestamp = DateTime.now():ToIsoDate(),
-            footer = {
-                text = "Grow a Garden Stock Bot (Mobile)"
-            }
-        }}
+    local body={
+        embeds={{title=h,description=i,color=j,timestamp=DateTime.now():ToIsoDate(),footer={text="Grow a Garden Stock Bot (Mobile)"}}}
     }
 
     requestFunc({
-        Url = _G.WebhookURL,
-        Method = "POST",
-        Headers = {["Content-Type"] = "application/json"},
-        Body = HttpService:JSONEncode(body)
+        Url=_G.WebhookURL,
+        Method="POST",
+        Headers={["Content-Type"]="application/json"},
+        Body=HttpService:JSONEncode(body)
     })
 end
 
--- 🧩 ค้นหา packet ที่ต้องการจาก data
-local function GetPacket(data, key)
-    for _, packet in ipairs(data) do
-        if packet[1] == key then
-            return packet[2]
-        end
+local function d(k,l)
+    for m,n in ipairs(k) do
+        if n[1]==l then return n[2] end
     end
 end
 
--- 📥 รับ event และส่งรายงาน
-DataStream.OnClientEvent:Connect(function(eventType, profile, data)
-    if eventType ~= "UpdateData" then return end
-    if not profile:find(LocalPlayer.Name) then return end
+local layout = {
+    ["ROOT/SeedStock/Stocks"]={title="🌱 SEEDS STOCK",color=65280},
+    ["ROOT/GearStock/Stocks"]={title="🛠️ GEAR STOCK",color=16753920},
+    ["ROOT/PetEggStock/Stocks"]={title="🥚 EGG STOCK",color=16776960},
+    ["ROOT/CosmeticStock/ItemStocks"]={title="🎨 COSMETIC STOCK",color=16737792},
+    ["ROOT/EventShopStock/Stocks"]={title="🎁 EVENT STOCK",color=10027263}
+}
 
-    for path, layout in pairs(_G.Layout) do
-        local stockData = GetPacket(data, path)
-        if stockData then
-            local stockStr = GetStockString(stockData)
-            if stockStr ~= "" then
-                SendSingleEmbed(layout.title, stockStr, layout.color)
+DataStream.OnClientEvent:Connect(function(o,p,q)
+    if o~="UpdateData" then return end
+    if not p:find(LocalPlayer.Name) then return end
+    for r,s in pairs(layout) do
+        local t=d(q,r)
+        if t then
+            local u=a(t)
+            if u~="" then
+                c(s.title,u,s.color)
             end
         end
     end
 end)
 
-print("[✅] Stock Checker พร้อมทำงาน (แบบแยก Embed)")
+print("[✅] Stock Checker พร้อมทำงาน (แบบ Obfuscate & base64)")
+
