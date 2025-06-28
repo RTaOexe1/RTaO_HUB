@@ -1,9 +1,10 @@
 local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WebhookInputGui"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, 400, 0, 150)
@@ -35,9 +36,33 @@ Button.MouseButton1Click:Connect(function()
         return
     end
 
-    local mainCode = game:HttpGet("https://raw.githubusercontent.com/RTaOexe1/RTaO_HUB/main/Main.lua")
-    mainCode = mainCode:gsub("{{WEBHOOK}}", webhook)
-    loadstring(mainCode)()
+    -- แปลง webhook เป็น base64
+    local function encodeBase64(data)
+        local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+        return ((data:gsub('.', function(x)
+            local r,bits='',x:byte()
+            for i=8,1,-1 do r=r..(bits%2^i-bits%2^(i-1)>0 and '1' or '0') end
+            return r
+        end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
+            if #x < 6 then return '' end
+            local c=0
+            for i=1,6 do c=c + (x:sub(i,i)=='1' and 2^(6-i) or 0) end
+            return b:sub(c+1,c+1)
+        end)..({ '', '==', '=' })[#data%3+1])
+    end
 
+    local base64Webhook = encodeBase64(webhook)
+
+    local success, mainCode = pcall(function()
+        return game:HttpGet("https://raw.githubusercontent.com/RTaOexe1/RTaO_HUB/main/Main.lua")
+    end)
+
+    if not success then
+        warn("โหลด Main.lua ไม่สำเร็จ")
+        return
+    end
+
+    mainCode = mainCode:gsub("{{WEBHOOK}}", base64Webhook)
+    loadstring(mainCode)()
     ScreenGui:Destroy()
 end)
