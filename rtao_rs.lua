@@ -135,3 +135,12 @@ DataStream.OnClientEvent:Connect(function(eventType, profile, data)
 end)
 
 print("[✅] Stock Checker พร้อมทำงาน (Webhook แบบเข้ารหัส + ภาพ Embed)")
+
+-- 🟢 แจ้งเตือนเมื่อรันสคริปต์สำเร็จ
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "RTaO HOOKS",
+        Text = "รัน RTaO HOOKS สำเร็จ",
+        Duration = 3
+    })
+end)
