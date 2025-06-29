@@ -141,6 +141,7 @@ pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "RTaO HOOKS",
         Text = "รัน RTaO HOOKS สำเร็จ",
-        Duration = 3
+        Duration = 3,
+        Icon = "rbxassetid://70576862346242" -- 👈 ใส่ไอคอนที่คุณอัปโหลด
     })
 end)
