@@ -81,7 +81,7 @@ local function SendSingleEmbed(title, bodyText, color, encodedWebhook, imageUrl)
         description = bodyText,
         color = color,
         timestamp = DateTime.now():ToIsoDate(),
-        footer = { text = "Grow a Garden Stock Bot (Secure)" }
+        footer = { text = "Grow a Garden Stock Bot (BY RTaO)" }
     }
 
     if imageUrl then
