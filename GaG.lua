@@ -1,4 +1,4 @@
-setclipboard("https://discord.gg/dmBzVaRrD3")
+setclipboard("https://discord.gg/EH23mXVqce")
 -- Services
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
