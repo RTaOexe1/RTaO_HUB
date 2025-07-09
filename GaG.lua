@@ -685,12 +685,7 @@ local function isInsideFarm(part)
 end
 
 local function handleNewPrompt(prompt)
-    if not prompt:IsA("ProximityPrompt") then return end
-    if not isInsideFarm(prompt) then return end
-    
-    if not promptTracker[prompt] then
-        promptTracker[prompt] = {
-            originalRequiresLOS = prompt.RequiresLineOfSight,
+    if not prompt:IsA("ProximityPrompt") then return endฟฟๆๆทไม่RequiresLineOfSight,
             originalExclusivity = prompt.Exclusivity
         }
     end
@@ -1188,19 +1183,19 @@ end
 -- UI Setup
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
-    Name = "Grow a Garden | PolleserHub",
+    Name = "Grow a Garden | RTaO Hub",
     Icon = 0,
-    LoadingTitle = "Grow a Garden | PolleserHub",
-    LoadingSubtitle = "by Polleser",
+    LoadingTitle = "Grow a Garden | RTaOHub",
+    LoadingSubtitle = "by RTaO",
     Theme = "Ocean",
-    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "Polleser Hub" },
+    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "RTaO Hub" },
     Discord = { Enabled = true, Invite = "dmBzVaRrD3", RememberJoins = true },
     KeySystem = false,
     KeySettings = {
-        Title = "Polleser Hub Key System",
+        Title = "RTaO Hub Key System",
         Subtitle = "Hello.",
         Note = "To get the Script's Key you need to join our Discord server the link is already copied.",
-        FileName = "PolleserHub Key",
+        FileName = "RTaO Hub Key",
         SaveKey = true,
         GrabKeyFromSite = false,
         Key = {
