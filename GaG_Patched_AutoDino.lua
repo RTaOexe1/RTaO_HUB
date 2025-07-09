@@ -1188,19 +1188,19 @@ end
 -- UI Setup
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
-    Name = "Grow a Garden | PolleserHub",
+    Name = "Grow a Garden | RTaO Hub",
     Icon = 0,
-    LoadingTitle = "Grow a Garden | PolleserHub",
-    LoadingSubtitle = "by Polleser",
+    LoadingTitle = "Grow a Garden | RTaO Hub",
+    LoadingSubtitle = "by RTaO",
     Theme = "Ocean",
-    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "Polleser Hub" },
+    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "RTaO Hub" },
     Discord = { Enabled = true, Invite = "dmBzVaRrD3", RememberJoins = true },
     KeySystem = false,
     KeySettings = {
-        Title = "Polleser Hub Key System",
+        Title = "RTaO Hub Key System",
         Subtitle = "Hello.",
         Note = "To get the Script's Key you need to join our Discord server the link is already copied.",
-        FileName = "PolleserHub Key",
+        FileName = "RTaO Key",
         SaveKey = true,
         GrabKeyFromSite = false,
         Key = {
