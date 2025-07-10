@@ -1224,77 +1224,94 @@ local VisualsTab = Window:CreateTab("Visuals", "eye")
 
 -- Main Tab
 
--- 🌱 เพิ่มระบบ Auto Dino Quest พร้อม GUI Log
+-- 🌱 ระบบ Auto Dino Quest (รวมแล้ว)
 
+-- Load Correct Dino Quest Data
+local DinoQuestData = require(game:GetService("ReplicatedStorage").Data.QuestData.QuestContainers.Dino)
+local RewardsData = require(game:GetService("ReplicatedStorage").Data.UpdateEvents.Dino)
+
+-- Load Module Controller
+local QuestsController = require(game:GetService("ReplicatedStorage").Module.DinoQuestsController)
+
+-- GameEvents Remotes
+local EventsFolder  = game:GetService("ReplicatedStorage"):WaitForChild("Game").Events
+local ClaimRemote   = EventsFolder:WaitForChild("ClaimDinoQuest")
+local SubmitRemote  = EventsFolder:WaitForChild("SubmitDinoQuest")
+local RestartRemote = EventsFolder:FindFirstChild("RestartDinoTrack")
+
+-- UI Setup
 local DinoLogLabel = MainTab:CreateLabel("🦖 Dino Quest Log: รอเริ่ม Event...")
-
 local function UpdateDinoLog(text)
-    if DinoLogLabel then
-        DinoLogLabel:Set("🦖 Dino Quest Log: " .. text)
-    end
+    DinoLogLabel:Set("🦖 Dino Quest Log: " .. text)
 end
 
+-- Check if Dino Event Active
 local function IsDinoEventActive()
-    local dinoQuestUI = lp:FindFirstChild("PlayerGui") and lp.PlayerGui:FindFirstChild("Hud_UI")
-    return ReplicatedStorage.GameEvents:FindFirstChild("ClaimDinoQuest") ~= nil and dinoQuestUI and dinoQuestUI.TopBtns and dinoQuestUI.TopBtns.DinoQuest.Visible
+    local dinoUI = lp:FindFirstChild("PlayerGui") and lp.PlayerGui:FindFirstChild("DinoQuest_UI")
+    return ClaimRemote and dinoUI and dinoUI.Enabled
 end
 
-local function AutoClaimDinoQuest()
-    local DinoRemote = ReplicatedStorage.GameEvents:FindFirstChild("ClaimDinoQuest")
-    if DinoRemote and IsDinoEventActive() then
-        DinoRemote:FireServer()
-        UpdateDinoLog("รับเควส Dino แล้ว!")
-    end
-end
-
+-- ฟังก์ชันหลัก: ทำเควส Dino อัตโนมัติ
 function AutoDoDinoQuest()
     task.spawn(function()
         while IsDinoEventActive() do
-            AutoClaimDinoQuest()
-
-            local questPanel = lp.PlayerGui:FindFirstChild("DinoQuest_UI")
-            if questPanel and questPanel.Enabled then
-                local taskText = questPanel.Frame.Task.Text
-                local fruitName = nil
-                if taskText:find("Harvest") then
-                    fruitName = taskText:match("Harvest %d+ ([%a%s]+)")
-                end
-
-                if fruitName then
-                    UpdateDinoLog("กำลังหา: " .. fruitName)
-                    autoFarmEnabled = true
-                    instantFarm()
-                    task.wait(15)
-                    autoFarmEnabled = false
-                end
-
-                local submitRemote = ReplicatedStorage.GameEvents:FindFirstChild("SubmitDinoQuest")
-                if submitRemote then
-                    submitRemote:FireServer()
-                    UpdateDinoLog("✅ ส่งเควสเรียบร้อยแล้ว")
-                end
-            else
-                UpdateDinoLog("❌ ยังไม่พบเควส Dino")
+            local activeQuest = QuestsController:GetActiveQuest(lp)
+            if not activeQuest then
+                ClaimRemote:FireServer()
+                UpdateDinoLog("รับเควสใหม่...")
+                task.wait(1)
+                activeQuest = QuestsController:GetActiveQuest(lp)
             end
 
-            task.wait(10)
+            if activeQuest then
+                local targetName  = activeQuest.ItemName or "Unknown"
+                local targetCount = activeQuest.Amount or 0
+                local collected   = activeQuest.Collected or 0
+
+                UpdateDinoLog(string.format("ทำเควส: เก็บ %d x %s (มีแล้ว %d)", targetCount, targetName, collected))
+
+                autoFarmEnabled = true
+                instantFarm()
+                repeat
+                    task.wait(1)
+                    activeQuest = QuestsController:GetActiveQuest(lp)
+                    collected = activeQuest and activeQuest.Collected or 0
+                until collected >= targetCount or not IsDinoEventActive()
+                autoFarmEnabled = false
+
+                if SubmitRemote then
+                    SubmitRemote:FireServer()
+                    UpdateDinoLog("✅ ส่งเควสเรียบร้อยแล้ว")
+                end
+
+                local rewardInfo = RewardsData[targetName]
+                if rewardInfo then
+                    print(string.format("🎁 รางวัล: %s x%d", rewardInfo.Item or "?", rewardInfo.Amount or 1))
+                end
+
+                task.wait(5)
+            else
+                UpdateDinoLog("❌ ไม่พบเควส Dino")
+                task.wait(3)
+            end
         end
+        UpdateDinoLog("⏹️ ปิดระบบ Auto Dino Quest")
     end)
 end
 
+-- เพิ่มปุ่มใน MainTab
 MainTab:CreateToggle({
     Name = "Auto Dino Quest",
     CurrentValue = false,
     Callback = function(state)
         if state then
-            UpdateDinoLog("🔄 เริ่มระบบทำเควส Dino...")
+            UpdateDinoLog("🔄 เริ่มระบบ Auto Dino Quest")
             AutoDoDinoQuest()
         else
             UpdateDinoLog("⏹️ ปิดระบบ Auto Dino Quest")
         end
     end
 })
-
 
 
 MainTab:CreateSection("Auto Farm")
