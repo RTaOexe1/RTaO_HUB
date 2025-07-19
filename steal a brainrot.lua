@@ -77,8 +77,8 @@ end
 
 -- Create Window
 local Window = redzlib:MakeWindow({
-    Title = "Zeta Hub X Steal a Brainrot",
-    SubTitle = "by SILENT",
+    Title = "RTaO Hub X Steal a Brainrot",
+    SubTitle = "by RTaO",
     SaveFolder = "ZetaHubUniversal"
 })
 
