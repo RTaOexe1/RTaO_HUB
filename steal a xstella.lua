@@ -5,12 +5,12 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-if CoreGui:FindFirstChild("StellarHubUI") then
-    CoreGui:FindFirstChild("StellarHubUI"):Destroy()
+if CoreGui:FindFirstChild("RTaOHubUI") then
+    CoreGui:FindFirstChild("RTaOHubUI"):Destroy()
 end
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "StellarHubUI"
+gui.Name = "RTaOHubUI"
 gui.ResetOnSpawn = false
 gui.Parent = CoreGui
 
@@ -24,7 +24,7 @@ frame.Visible = true
 frame.Parent = gui
 
 local title = Instance.new("TextLabel")
-title.Text = "StellarHub"
+title.Text = "RTaOHub"
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(255,255,255)
@@ -35,7 +35,7 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = frame
 
 local madeByLabel = Instance.new("TextLabel")
-madeByLabel.Text = "Made By Stellar"
+madeByLabel.Text = "Made By RTaO"
 madeByLabel.Font = Enum.Font.SourceSans
 madeByLabel.TextSize = 12
 madeByLabel.TextColor3 = Color3.fromRGB(150,150,150)
